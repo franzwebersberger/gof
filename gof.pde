@@ -3,10 +3,12 @@
  * https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
  * 
  * Commands:
- * SPACE: pause and change cell's
- * R: reset
- * C: clear
- * G: Gosper Glider Gun
+ * ' ': pause and change cell's
+ * 'r': reset
+ * 'c': clear
+ * 
+ * position patterns: see Patterns
+ *
  */
 
 // Number of cells
@@ -16,7 +18,7 @@ final int ny = 100;
 // Size of cells
 final int cellSize = 8;
 
-// Proability for randomInit (in %)
+// Proability for init (in %)
 final float p0 = 15;
 
 // Iteration timer (ms)
@@ -46,7 +48,7 @@ void setup() {
   textFont(font, 16);
   background(0);
   //randomInit(p0);
-  pattern(50, 50, gosper_glider_gun );
+  pattern(70, 50, gosper_glider_gun );
 }
 
 void draw() {
@@ -59,13 +61,12 @@ void draw() {
       else {
         fill(dead); // If dead
       }
-      rect (x*cellSize, y*cellSize, cellSize, cellSize);
+      rect(x*cellSize, y*cellSize, cellSize, cellSize);
     }
   }
   // Print iteration
   fill(255);
   text("" + iterationCounter,10,20);
-  
   // Iterate if timer ticks
   if (millis()-lastRecordedTime > interval) {
     if (!pause) {
@@ -91,22 +92,31 @@ void draw() {
 }
 
 void keyPressed() {
-  // restart
-  if (key=='r' || key == 'R') {
-    randomInit(p0);
+  switch(key) {
+    case ' ':
+      pause = !pause;
+      break;
+    case 'r':
+      init(p0);
+      break;
+    case 'c':
+      init(0);
+      break;
+    default:
+      int[][] p = PATTERN_MAP.get(key);
+      if (p != null) {
+        MousePosition mp = mousePos();
+        pattern(mp.x, mp.y, p);
+      }
   }
-  // pause
-  if (key==' ') {
-    pause = !pause;
-  }
-  // clear
-  if (key=='c' || key == 'C') {
-    randomInit(0.0);
-  }
-  // glider_gun at mouse position
-  if (key == 'g' || key == 'G') {
-    MousePosition mp = mousePos();
-    pattern(mp.x, mp.y, gosper_glider_gun);
+}
+
+class MousePosition {
+  public final int x;
+  public final int y;
+  MousePosition(int x, int y) {
+    this.x = x;
+    this.y = y;
   }
 }
 
@@ -162,7 +172,7 @@ int neighbours(int x, int y) {
   return cnt;
 }
 
-void randomInit(float p) {
+void init(float p) {
   iterationCounter = 0;
   for (int x=0; x<nx; x++) {
     for (int y=0; y<ny; y++) {
@@ -181,27 +191,5 @@ void pattern(int x, int y, int[][] p) {
     for (int px=0; px<p[0].length; px++) {
       cells[(x+px)%nx][(y+py)%ny] = p[py][px];
     }
-  }
-}
-
-final int[][] gosper_glider_gun = {
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
-    {0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
-    {1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-};
-
-
-class MousePosition {
-  public final int x;
-  public final int y;
-  MousePosition(int x, int y) {
-    this.x = x;
-    this.y = y;
   }
 }
